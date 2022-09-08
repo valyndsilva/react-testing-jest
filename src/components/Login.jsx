@@ -14,10 +14,11 @@ function Login() {
       const { data } = await axios.get(
         "https://jsonplaceholder.typicode.com/users/1"
       );
-      setUser(data);
+      setUser(data); // test user should be rendered after fetching by commenting this
     } catch (err) {
       setError(true);
     }
+    setLoading(false);
   };
   return (
     <div className="flex flex-col w-full h-[100vh] items-center justify-center">
