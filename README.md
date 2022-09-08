@@ -1,70 +1,567 @@
-# Getting Started with Create React App
+# React Testing Library Jest:
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Open App.test.js:
 
-## Available Scripts
+Run in terminal:
 
-In the project directory, you can run:
+```
+npm start
+```
 
-### `npm start`
+In App.test.js:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```
+import { render, screen } from '@testing-library/react';
+import App from './App';
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+test('renders learn react link', () => {
+  render(<App />);
+  const linkElement = screen.getByText(/learn react/i);
+  expect(linkElement).toBeInTheDocument();
+});
 
-### `npm test`
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+In App.js:
 
-### `npm run build`
+```
+import logo from './logo.svg';
+import './App.css';
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+function App() {
+  return (
+    <div className="App">
+      <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+        <p>
+          Edit <code>src/App.js</code> and save to reload.
+        </p>
+        <a
+          className="App-link"
+          href="https://reactjs.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn React
+        </a>
+      </header>
+    </div>
+  );
+}
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+export default App;
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
 
-### `npm run eject`
+## A Test consists of 3 parts:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Step 1: Rendering the component:
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
+  render(<App />);
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Select a specific html element:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+There are various methods to select the html element. You can provide a "data-testid" attribute to the html element or getByText etc.
 
-## Learn More
+```
+ const linkElement = screen.getByText(/learn react/i);
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+We use / /i to set it as case-insensitive
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Here it basically selects the link in App.js which has the text "Learn React":
 
-### Code Splitting
+```
+<a
+   className="App-link"
+   href="https://reactjs.org"
+   target="_blank"
+   rel="noopener noreferrer"
+>
+  Learn React
+</a>
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Step 3: Expectation - Check if item exists in the document or not.
 
-### Analyzing the Bundle Size
+```
+expect(linkElement).toBeInTheDocument();
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+To run the test:
 
-### Making a Progressive Web App
+```
+npm test
+a
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+It passes the test. Now if you change the Text in the link it fails.
 
-### Advanced Configuration
+```
+  TestingLibraryElementError: Unable to find an element with the text: /learn react/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Let's do a few more exmaples:
 
-### Deployment
+#### Example 1:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+In App.js create a list of 3 items:
 
-### `npm run build` fails to minify
+```
+      <header className="App-header">
+       .....
+        <ul>
+          <li>United Kingdom</li>
+          <li>United Sates Of America</li>
+          <li>Asia</li>
+        </ul>
+      </header>
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Create a new test in App.test.js to check if the list has 3 items:
+
+Refer to https://testing-library.com/docs/queries/about for the full list of queries
+
+https://testing-library.com/docs/queries/byrole
+
+Here we can use .getByRole but since we have more than 1 item, we need to use .getAllByRole
+
+Refer to the table of HTML elements with their default and desired roles here. https://www.w3.org/TR/html-aria/#docconformance
+
+Find the li element in the table to find the correct role name.
+
+```
+li     role=listitem
+```
+
+```
+test("renders 3 list items", () => {
+  render(<App />);
+  const listElement = screen.getAllByRole("listitem");
+  expect(listElement).toHaveLength(3);
+});
+```
+
+You can refer to the expect methods list to choose the right method for your test case:
+https://jestjs.io/docs/expect
+
+#### Example 2:
+
+In App.js create a title and sum element:
+
+```
+import logo from "./logo.svg";
+import "./App.css";
+
+function App() {
+  const a = 2;
+  const b = 4;
+  return (
+    ..
+    <header className="App-header">
+       .....
+       <h1 data-testid="mytestid">Hello</h1>
+        <span title="sum">{a+b}</span>
+      </header>
+```
+
+Create 2 new tests in App.test.js to check the title and sum:
+
+Refer to https://testing-library.com/docs/queries/about for the full list of queries
+
+Test title:
+
+https://testing-library.com/docs/queries/bytestid
+
+Here we can use .getByTestId
+
+```
+test("renders title", () => {
+  render(<App />);
+  const titleElement = screen.getByTestId("mytestid");
+  expect(titleElement).toBeInTheDocument();
+});
+```
+
+You can refer to the expect methods list to choose the right method for your test case:
+https://jestjs.io/docs/expect
+
+Test sum:
+
+https://testing-library.com/docs/queries/bytitle
+
+Here we can use .getByTitle
+
+```
+test("sum should be 6", () => {
+  render(<App />);
+  const sumElement = screen.getByTitle("sum");
+  expect(sumElement.textContent).toBe("6");
+});
+
+```
+
+You can refer to the expect methods list to choose the right method for your test case:
+https://jestjs.io/docs/expect
+
+## Wallaby.js Extension:
+
+Provides you with an accelaretd distraction-free JS testing.
+
+cmd+shift+p on Mac
+ctrl+shift+p on Windows
+
+Select Wallaby.js:Start and you can see errors in realtime next to the test. Click on View Story to see the detailed view of an error.
+
+Install Tailwindcss:
+
+```
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+```
+
+In tailwind.config.js:
+
+```
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+
+```
+
+## JEST and Testing Library:
+
+To test your application you need to reach the DOM elements and Testing Library (https://testing-library.com/docs) helps us reach the DOM elements by using different queries (https://testing-library.com/docs/queries) and user actions (https://testing-library.com/docs/dom-testing-library/api-events).
+
+JEST is a JS Testing Library which lets you run tests.
+
+## Test-Driven Development:
+
+We write our tests first and then create every element or function in our application. TDD let's you focus on the user interaction first.
+
+Create a Login component in components/Login.jsx:
+
+```
+import React, { useState } from "react";
+
+function Login() {
+  const [error, setError] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+const handleClick = async (e)=>{
+    e.preventDefault();
+    try{
+
+    }catch(err){
+
+    }
+
+}
+  return (
+    <div className="flex flex-col w-full h-[100vh] items-center justify-center">
+      <form className="flex flex-col items-center">
+        <span className="text-black font-bold">username</span>
+        <input
+          className="p-2 my-2 h-8 border rounded-md"
+          type="text"
+          placeholder="username"
+          //   value="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          className="p-2 my-2 h-8 border rounded-md"
+          type="password"
+          placeholder="password"
+          //   value="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button
+          //   disabled="true"
+          disabled={!username || !password}
+          className="w-36 h-7 bg-teal-600 text-white border-none font-bold m-2  cursor-pointer rounded-md disabled:bg-teal-300 disabled:cursor-not-allowed"
+          onClick={handleClick}
+        >
+          Login
+        </button>
+      </form>
+      <span
+        data-testid="error"
+        style={{ visibility: error ? "visible" : "hidden" }}
+        className="text-red-400 mt-5"
+      >
+        Something went wrong!
+      </span>
+    </div>
+  );
+}
+
+export default Login;
+
+
+```
+
+Create in components/Login.test.js
+
+Refer to https://testing-library.com/docs/queries/about for the full list of queries
+
+You can refer to the expect methods list to choose the right method for your test case:
+https://jestjs.io/docs/expect
+
+```
+import { fireEvent, render, screen } from "@testing-library/react";
+import Login from "./Login";
+
+test("username input should be rendered", () => {
+  render(<Login />);
+  const userInputEl = screen.getByPlaceholderText(/username/i);
+  expect(userInputEl).toBeInTheDocument();
+});
+
+test("password input should be rendered", () => {
+  render(<Login />);
+  const passwordInputEl = screen.getByPlaceholderText(/password/i);
+  expect(passwordInputEl).toBeInTheDocument();
+});
+
+test("button should be rendered", () => {
+  render(<Login />);
+  const buttonEl = screen.getByRole("button");
+  expect(buttonEl).toBeInTheDocument();
+});
+
+test("username input should be empty", () => {
+  render(<Login />);
+  const userInputEl = screen.getByPlaceholderText(/username/i);
+  expect(userInputEl.value).toBe("");
+});
+
+test("password input should be empty", () => {
+  render(<Login />);
+  const passwordInputEl = screen.getByPlaceholderText(/password/i);
+  expect(passwordInputEl.value).toBe("");
+});
+
+test("button should be disabled by default", () => {
+  render(<Login />);
+  const buttonEl = screen.getByRole("button");
+  expect(buttonEl).toBeDisabled();
+});
+
+test("error message should not be visible", () => {
+  render(<Login />);
+  const errorEl = screen.getByTestId("error");
+  expect(errorEl).not.toBeVisible();
+});
+
+test("username input should change", () => {
+  render(<Login />);
+  const userInputEl = screen.getByPlaceholderText(/username/i);
+  const testValue = "test";
+  fireEvent.change(userInputEl, { target: { value: testValue } });
+  expect(userInputEl.value).toBe(testValue);
+});
+
+test("password input should change", () => {
+  render(<Login />);
+  const passwordInputEl = screen.getByPlaceholderText(/password/i);
+  const testValue = "test";
+  fireEvent.change(passwordInputEl, { target: { value: testValue } });
+  expect(passwordInputEl.value).toBe(testValue);
+});
+
+
+test("button should not be disabled when username and password entered", () => {
+    render(<Login />);
+    const buttonEl = screen.getByRole("button");
+    const userInputEl = screen.getByPlaceholderText(/username/i);
+    const passwordInputEl = screen.getByPlaceholderText(/password/i);
+    const testValue = "test";
+    fireEvent.change(userInputEl, { target: { value: testValue } });
+    fireEvent.change(passwordInputEl, { target: { value: testValue } });
+    expect(buttonEl).not.toBeDisabled();
+  });
+
+```
+
+Install axios:
+
+```
+npm instal axios
+```
+
+Create the handleClick function in Login.js:
+We make use of axios and a fake REST Api link: https://jsonplaceholder.typicode.com/users/1
+
+```
+import axios from "axios";
+import React, { useState } from "react";
+
+function Login() {
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [user, setUser] = useState({});
+  const handleClick = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { data } = await axios.get(
+        "https://jsonplaceholder.typicode.com/users/1"
+      );
+      setUser(data);
+    } catch (err) {
+      setError(true);
+    }
+  };
+  return (
+    <div className="flex flex-col w-full h-[100vh] items-center justify-center">
+      <form className="flex flex-col items-center">
+        <span className="text-black font-bold">{user.name}</span>
+        <input
+          className="p-2 my-2 h-8 border rounded-md"
+          type="text"
+          placeholder="username"
+          //   value="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          className="p-2 my-2 h-8 border rounded-md"
+          type="password"
+          placeholder="password"
+          //   value="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button
+          //   disabled="true"
+          disabled={!username || !password}
+          className="w-36 h-7 bg-teal-600 text-white border-none font-bold m-2  cursor-pointer rounded-md disabled:bg-teal-300 disabled:cursor-not-allowed"
+          onClick={handleClick}
+        >
+          {loading ? "Please wait..." : "Login"}
+        </button>
+      </form>
+      <span
+        data-testid="error"
+        style={{ visibility: error ? "visible" : "hidden" }}
+        className="text-red-400 mt-5"
+      >
+        Something went wrong!
+      </span>
+    </div>
+  );
+}
+
+export default Login;
+
+```
+
+In Login.test.js:
+
+```
+import { fireEvent, render, screen } from "@testing-library/react";
+import Login from "./Login";
+
+test("username input should be rendered", () => {
+  render(<Login />);
+  const userInputEl = screen.getByPlaceholderText(/username/i);
+  expect(userInputEl).toBeInTheDocument();
+});
+
+test("password input should be rendered", () => {
+  render(<Login />);
+  const passwordInputEl = screen.getByPlaceholderText(/password/i);
+  expect(passwordInputEl).toBeInTheDocument();
+});
+
+test("button should be rendered", () => {
+  render(<Login />);
+  const buttonEl = screen.getByRole("button");
+  expect(buttonEl).toBeInTheDocument();
+});
+
+test("username input should be empty", () => {
+  render(<Login />);
+  const userInputEl = screen.getByPlaceholderText(/username/i);
+  expect(userInputEl.value).toBe("");
+});
+
+test("password input should be empty", () => {
+  render(<Login />);
+  const passwordInputEl = screen.getByPlaceholderText(/password/i);
+  expect(passwordInputEl.value).toBe("");
+});
+
+test("button should be disabled by default", () => {
+  render(<Login />);
+  const buttonEl = screen.getByRole("button");
+  expect(buttonEl).toBeDisabled();
+});
+
+test("loading should not be rendered", () => {
+  render(<Login />);
+  const buttonEl = screen.getByRole("button");
+  expect(buttonEl).not.toHaveTextContent(/please wait/i);
+});
+
+test("error message should not be visible", () => {
+  render(<Login />);
+  const errorEl = screen.getByTestId("error");
+  expect(errorEl).not.toBeVisible();
+});
+
+test("username input should change", () => {
+  render(<Login />);
+  const userInputEl = screen.getByPlaceholderText(/username/i);
+  const testValue = "test";
+  fireEvent.change(userInputEl, { target: { value: testValue } });
+  expect(userInputEl.value).toBe(testValue);
+});
+
+test("password input should change", () => {
+  render(<Login />);
+  const passwordInputEl = screen.getByPlaceholderText(/password/i);
+  const testValue = "test";
+  fireEvent.change(passwordInputEl, { target: { value: testValue } });
+  expect(passwordInputEl.value).toBe(testValue);
+});
+
+test("button should not be disabled when username and password entered", () => {
+  render(<Login />);
+  const buttonEl = screen.getByRole("button");
+  const userInputEl = screen.getByPlaceholderText(/username/i);
+  const passwordInputEl = screen.getByPlaceholderText(/password/i);
+  const testValue = "test";
+  fireEvent.change(userInputEl, { target: { value: testValue } });
+  fireEvent.change(passwordInputEl, { target: { value: testValue } });
+  expect(buttonEl).not.toBeDisabled();
+});
+
+test("loading should be rendered when button when username and password entered and button is clicked", () => {
+  render(<Login />);
+  const buttonEl = screen.getByRole("button");
+  const userInputEl = screen.getByPlaceholderText(/username/i);
+  const passwordInputEl = screen.getByPlaceholderText(/password/i);
+  const testValue = "test";
+  fireEvent.change(userInputEl, { target: { value: testValue } });
+  fireEvent.change(passwordInputEl, { target: { value: testValue } });
+  fireEvent.click(buttonEl);
+  expect(buttonEl).toHaveTextContent(/please wait/i);
+});
+
+```
+Your tests should not depened on the browser or back end server. Create an axios mock so we don't need anything from the browser or back-end server like axios calls while testing. 
+
+In src/__mocks__/axios.js:
+
